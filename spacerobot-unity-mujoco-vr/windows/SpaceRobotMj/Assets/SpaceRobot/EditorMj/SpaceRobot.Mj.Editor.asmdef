@@ -1,0 +1,7 @@
+{
+  "name": "SpaceRobot.Mj.Editor",
+  "references": ["Mujoco.Runtime", "Mujoco.Editor", "SpaceRobot.Mj"],
+  "includePlatforms": ["Editor"],
+  "allowUnsafeCode": true,
+  "autoReferenced": true
+}

@@ -1,0 +1,18 @@
+{
+  "engine": "MuJoCo 3.11.0 in-process via org.mujoco Unity plug-in",
+  "unity": "6000.6.6f1",
+  "duration_s": 150.0,
+  "physics_timestep_s": 0.001,
+  "final_stage": "cap-task-complete",
+  "final_cap_angle_rad": 0.9459142587755778,
+  "regrasp_waits": 0,
+  "minimum_active_rail_latches": 3,
+  "maximum_cap_finger_contacts": 4,
+  "maximum_cap_contact_force_N": 193.02219368032144,
+  "headless_wall_s": 39.3,
+  "headless_realtime_factor": 3.8,
+  "microseconds_per_step_with_control": 262,
+  "microseconds_per_step_solver_only": 35,
+  "note": "Deterministic: repeated runs, including from a fresh extraction of the project archive, reproduce this value exactly.",
+  "platform": "Measured on Linux x86_64. The Windows player is built from the same project; it was exercised under Wine 9.0 and reached 10.01 s of simulation with MuJoCo loaded, but has not been run on Windows itself."
+}

@@ -1,0 +1,10 @@
+{
+  "frames": 3000,
+  "geometries": 180,
+  "last_time_s": 149.9510040283203,
+  "final_stage": "cap-task-complete",
+  "final_cap_angle_rad": 0.9481716156005859,
+  "minimum_active_rail_latches": 3,
+  "maximum_cap_finger_contacts": 4,
+  "maximum_cap_contact_force_N": 181.29916381835938
+}

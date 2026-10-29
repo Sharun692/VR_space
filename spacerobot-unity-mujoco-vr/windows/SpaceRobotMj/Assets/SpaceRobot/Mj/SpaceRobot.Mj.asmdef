@@ -1,0 +1,6 @@
+{
+  "name": "SpaceRobot.Mj",
+  "references": ["Mujoco.Runtime"],
+  "allowUnsafeCode": true,
+  "autoReferenced": true
+}

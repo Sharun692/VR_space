@@ -1,0 +1,504 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="spacerobot_articulated_service_robot">
+  <compiler angle="radian" autolimits="true" balanceinertia="true" />
+  <option timestep="0.001" gravity="0 0 -8.7e-06" integrator="implicitfast" solver="Newton" cone="elliptic" iterations="80" tolerance="1e-10" noslip_iterations="4" />
+  <size njmax="20000" nconmax="3000" />
+  <visual>
+    <global azimuth="132" elevation="-18" offwidth="1600" offheight="900" />
+    <quality shadowsize="4096" />
+    <headlight diffuse="0.78 0.79 0.82" ambient="0.1 0.11 0.14" specular="0.35 0.35 0.38" />
+  </visual>
+  <default>
+    <default class="station_collision">
+      <geom contype="1" conaffinity="6" condim="6" friction="0.92 0.012 0.002" solref="0.004 1" solimp="0.96 0.995 0.001" />
+    </default>
+    <default class="robot_collision">
+      <geom contype="2" conaffinity="1" condim="4" friction="0.75 0.01 0.001" solref="0.005 1" solimp="0.95 0.995 0.001" />
+    </default>
+    <default class="finger_collision">
+      <geom contype="4" conaffinity="1" condim="6" friction="1.45 0.025 0.004" solref="0.008 1" solimp="0.94 0.995 0.001" />
+    </default>
+    <default class="decorative">
+      <geom contype="0" conaffinity="0" />
+    </default>
+  </default>
+  <asset>
+    <texture name="space" type="skybox" builtin="gradient" width="1024" height="1024" rgb1="0 0 0" rgb2="0.001 0.002 0.008" />
+    <material name="truss" rgba="0.82 0.84 0.82 1" specular="0.72" shininess="0.8" />
+    <material name="station" rgba="0.42 0.45 0.47 1" specular="0.55" shininess="0.65" />
+    <material name="blanket" rgba="0.86 0.87 0.84 1" specular="0.38" shininess="0.5" />
+    <material name="solar" rgba="0.012 0.055 0.16 1" specular="0.45" shininess="0.55" />
+    <material name="joint" rgba="0.025 0.027 0.032 1" specular="0.55" shininess="0.7" />
+    <material name="limb" rgba="0.58 0.61 0.63 1" specular="0.62" shininess="0.75" />
+    <material name="palm" rgba="0.1 0.11 0.13 1" specular="0.5" shininess="0.7" />
+    <material name="cap" rgba="0.95 0.58 0.1 1" specular="0.72" shininess="0.8" />
+    <material name="earth_ocean" rgba="0.01 0.16 0.62 1" specular="0.18" shininess="0.25" />
+    <material name="earth_land" rgba="0.05 0.4 0.13 1" specular="0.16" shininess="0.2" />
+  </asset>
+  <worldbody>
+    <light pos="-8 -8 10" dir="1 1 -1" directional="true" diffuse="0.95 0.93 0.88" />
+    <light pos="7 5 6" dir="-1 -1 -1" directional="true" diffuse="0.24 0.27 0.33" />
+    <geom name="earth" type="sphere" pos="-10 7 -5" size="2.8" material="earth_ocean" class="decorative" />
+    <geom name="earth_africa" type="ellipsoid" pos="-9.35 5.1 -4.2" size="0.76 0.14 0.55" euler="0.2 0.1 0.7" material="earth_land" class="decorative" />
+    <geom name="earth_eurasia" type="ellipsoid" pos="-8.95 5.4 -5.1" size="1 0.13 0.42" euler="-0.1 0.25 -0.35" material="earth_land" class="decorative" />
+    <body name="station">
+      <freejoint name="station_free" />
+      <inertial pos="0 0 0.08" mass="20000" diaginertia="75000 450000 500000" />
+      <geom name="central_node" type="box" pos="0 0 0.05" size="0.72 0.62 0.32" mass="420" material="station" class="station_collision" />
+      <geom name="central_blanket" type="box" pos="0 0 0.405" size="0.76 0.66 0.025" mass="22" material="blanket" class="station_collision" />
+      <geom name="lab_port" type="cylinder" fromto="-2.7 0 0.05 -0.72 0 0.05" size="0.38" mass="310" material="blanket" class="station_collision" />
+      <geom name="lab_starboard" type="cylinder" fromto="0.72 0 0.05 2.7 0 0.05" size="0.38" mass="310" material="blanket" class="station_collision" />
+      <geom name="node_fore" type="cylinder" fromto="0 0.6 0.1 0 2.1 0.1" size="0.34" mass="210" material="station" class="station_collision" />
+      <geom name="node_aft" type="cylinder" fromto="0 -0.6 0.1 0 -2.1 0.1" size="0.34" mass="210" material="station" class="station_collision" />
+      <geom name="docking_fore" type="cylinder" fromto="0 2.1 0.1 0 2.35 0.1" size="0.42" mass="48" material="joint" class="station_collision" />
+      <geom name="docking_aft" type="cylinder" fromto="0 -2.1 0.1 0 -2.35 0.1" size="0.42" mass="48" material="joint" class="station_collision" />
+      <geom name="rail_y-0.60_z-0.20" type="capsule" fromto="-8 -0.6 -0.2 8 -0.6 -0.2" size="0.035" mass="86" material="truss" class="station_collision" />
+      <geom name="rail_y-0.60_z+0.58" type="capsule" fromto="-8 -0.6 0.58 8 -0.6 0.58" size="0.035" mass="86" material="truss" class="station_collision" />
+      <geom name="rail_y+0.60_z-0.20" type="capsule" fromto="-8 0.6 -0.2 8 0.6 -0.2" size="0.035" mass="86" material="truss" class="station_collision" />
+      <geom name="rail_y+0.60_z+0.58" type="capsule" fromto="-8 0.6 0.58 8 0.6 0.58" size="0.035" mass="86" material="truss" class="station_collision" />
+      <geom name="top_rung_00" type="capsule" fromto="-8 -0.6 0.58 -8 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_00" type="capsule" fromto="-8 -0.6 -0.2 -8 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_00_n" type="capsule" fromto="-8 -0.3 0.58 -7 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_00_p" type="capsule" fromto="-8 0.3 0.58 -7 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_01" type="capsule" fromto="-7 -0.6 0.58 -7 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_01" type="capsule" fromto="-7 -0.6 -0.2 -7 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_01_n" type="capsule" fromto="-7 -0.3 -0.2 -6 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_01_p" type="capsule" fromto="-7 0.3 -0.2 -6 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_02" type="capsule" fromto="-6 -0.6 0.58 -6 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_02" type="capsule" fromto="-6 -0.6 -0.2 -6 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_02_n" type="capsule" fromto="-6 -0.3 0.58 -5 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_02_p" type="capsule" fromto="-6 0.3 0.58 -5 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_03" type="capsule" fromto="-5 -0.6 0.58 -5 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_03" type="capsule" fromto="-5 -0.6 -0.2 -5 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_03_n" type="capsule" fromto="-5 -0.3 -0.2 -4 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_03_p" type="capsule" fromto="-5 0.3 -0.2 -4 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_04" type="capsule" fromto="-4 -0.6 0.58 -4 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_04" type="capsule" fromto="-4 -0.6 -0.2 -4 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_04_n" type="capsule" fromto="-4 -0.3 0.58 -3 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_04_p" type="capsule" fromto="-4 0.3 0.58 -3 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_05" type="capsule" fromto="-3 -0.6 0.58 -3 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_05" type="capsule" fromto="-3 -0.6 -0.2 -3 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_05_n" type="capsule" fromto="-3 -0.3 -0.2 -2 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_05_p" type="capsule" fromto="-3 0.3 -0.2 -2 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_06" type="capsule" fromto="-2 -0.6 0.58 -2 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_06" type="capsule" fromto="-2 -0.6 -0.2 -2 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_06_n" type="capsule" fromto="-2 -0.3 0.58 -1 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_06_p" type="capsule" fromto="-2 0.3 0.58 -1 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_07" type="capsule" fromto="-1 -0.6 0.58 -1 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_07" type="capsule" fromto="-1 -0.6 -0.2 -1 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_07_n" type="capsule" fromto="-1 -0.3 -0.2 0 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_07_p" type="capsule" fromto="-1 0.3 -0.2 0 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_08" type="capsule" fromto="0 -0.6 0.58 0 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_08" type="capsule" fromto="0 -0.6 -0.2 0 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_08_n" type="capsule" fromto="0 -0.3 0.58 1 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_08_p" type="capsule" fromto="0 0.3 0.58 1 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_09" type="capsule" fromto="1 -0.6 0.58 1 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_09" type="capsule" fromto="1 -0.6 -0.2 1 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_09_n" type="capsule" fromto="1 -0.3 -0.2 2 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_09_p" type="capsule" fromto="1 0.3 -0.2 2 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_10" type="capsule" fromto="2 -0.6 0.58 2 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_10" type="capsule" fromto="2 -0.6 -0.2 2 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_10_n" type="capsule" fromto="2 -0.3 0.58 3 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_10_p" type="capsule" fromto="2 0.3 0.58 3 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_11" type="capsule" fromto="3 -0.6 0.58 3 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_11" type="capsule" fromto="3 -0.6 -0.2 3 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_11_n" type="capsule" fromto="3 -0.3 -0.2 4 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_11_p" type="capsule" fromto="3 0.3 -0.2 4 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_12" type="capsule" fromto="4 -0.6 0.58 4 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_12" type="capsule" fromto="4 -0.6 -0.2 4 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_12_n" type="capsule" fromto="4 -0.3 0.58 5 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_12_p" type="capsule" fromto="4 0.3 0.58 5 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_13" type="capsule" fromto="5 -0.6 0.58 5 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_13" type="capsule" fromto="5 -0.6 -0.2 5 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_13_n" type="capsule" fromto="5 -0.3 -0.2 6 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_13_p" type="capsule" fromto="5 0.3 -0.2 6 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_14" type="capsule" fromto="6 -0.6 0.58 6 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_14" type="capsule" fromto="6 -0.6 -0.2 6 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_14_n" type="capsule" fromto="6 -0.3 0.58 7 -0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_14_p" type="capsule" fromto="6 0.3 0.58 7 0.3 -0.2" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_15" type="capsule" fromto="7 -0.6 0.58 7 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_15" type="capsule" fromto="7 -0.6 -0.2 7 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="side_diag_15_n" type="capsule" fromto="7 -0.3 -0.2 8 -0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="side_diag_15_p" type="capsule" fromto="7 0.3 -0.2 8 0.3 0.58" size="0.018" mass="3" material="truss" class="station_collision" />
+      <geom name="top_rung_16" type="capsule" fromto="8 -0.6 0.58 8 0.6 0.58" size="0.024" mass="5" material="truss" class="station_collision" />
+      <geom name="bottom_rung_16" type="capsule" fromto="8 -0.6 -0.2 8 0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="boom_-5.2_-1" type="capsule" fromto="-5.2 -0.6 0.12 -5.2 -2.6 0.12" size="0.045" mass="26" material="truss" class="station_collision" />
+      <geom name="panel_-5.2_-1" type="box" pos="-5.2 -3.75 0.12" size="1.45 1.08 0.025" mass="45" material="solar" class="station_collision" />
+      <geom name="panel_grid_-5.2_-1_-0.96" type="box" pos="-6.16 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_-1_-0.48" type="box" pos="-5.68 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_-1_+0.00" type="box" pos="-5.2 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_-1_+0.48" type="box" pos="-4.72 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_-1_+0.96" type="box" pos="-4.24 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="boom_-5.2_+1" type="capsule" fromto="-5.2 0.6 0.12 -5.2 2.6 0.12" size="0.045" mass="26" material="truss" class="station_collision" />
+      <geom name="panel_-5.2_+1" type="box" pos="-5.2 3.75 0.12" size="1.45 1.08 0.025" mass="45" material="solar" class="station_collision" />
+      <geom name="panel_grid_-5.2_+1_-0.96" type="box" pos="-6.16 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_+1_-0.48" type="box" pos="-5.68 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_+1_+0.00" type="box" pos="-5.2 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_+1_+0.48" type="box" pos="-4.72 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_-5.2_+1_+0.96" type="box" pos="-4.24 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="boom_+5.2_-1" type="capsule" fromto="5.2 -0.6 0.12 5.2 -2.6 0.12" size="0.045" mass="26" material="truss" class="station_collision" />
+      <geom name="panel_+5.2_-1" type="box" pos="5.2 -3.75 0.12" size="1.45 1.08 0.025" mass="45" material="solar" class="station_collision" />
+      <geom name="panel_grid_+5.2_-1_-0.96" type="box" pos="4.24 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_-1_-0.48" type="box" pos="4.72 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_-1_+0.00" type="box" pos="5.2 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_-1_+0.48" type="box" pos="5.68 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_-1_+0.96" type="box" pos="6.16 -3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="boom_+5.2_+1" type="capsule" fromto="5.2 0.6 0.12 5.2 2.6 0.12" size="0.045" mass="26" material="truss" class="station_collision" />
+      <geom name="panel_+5.2_+1" type="box" pos="5.2 3.75 0.12" size="1.45 1.08 0.025" mass="45" material="solar" class="station_collision" />
+      <geom name="panel_grid_+5.2_+1_-0.96" type="box" pos="4.24 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_+1_-0.48" type="box" pos="4.72 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_+1_+0.00" type="box" pos="5.2 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_+1_+0.48" type="box" pos="5.68 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="panel_grid_+5.2_+1_+0.96" type="box" pos="6.16 3.75 0.15" size="0.01 1.08 0.008" mass="0.2" material="blanket" class="decorative" />
+      <geom name="radiator_boom_-3.4" type="capsule" fromto="-3.4 0.6 0.35 -3.4 1.35 0.35" size="0.03" mass="10" material="truss" class="station_collision" />
+      <geom name="radiator_-3.4" type="box" pos="-3.4 1.62 0.35" size="0.72 0.45 0.025" euler="0.22 0 0" mass="20" material="blanket" class="station_collision" />
+      <geom name="radiator_boom_+3.4" type="capsule" fromto="3.4 0.6 0.35 3.4 1.35 0.35" size="0.03" mass="10" material="truss" class="station_collision" />
+      <geom name="radiator_+3.4" type="box" pos="3.4 1.62 0.35" size="0.72 0.45 0.025" euler="0.22 0 0" mass="20" material="blanket" class="station_collision" />
+      <geom name="service_platform" type="box" pos="3.15 -1.1 0.67" size="0.38 0.18 0.07" mass="42" material="station" class="station_collision" />
+      <geom name="service_guard_left" type="capsule" fromto="2.8 -1.29 0.75 3 -1.29 0.75" size="0.02" mass="2" material="truss" class="station_collision" />
+      <geom name="service_guard_right" type="capsule" fromto="3.3 -1.29 0.75 3.5 -1.29 0.75" size="0.02" mass="2" material="truss" class="station_collision" />
+      <geom name="service_brace_b" type="capsule" fromto="3.48 -0.92 0.62 3.48 -0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="service_brace_d" type="capsule" fromto="3.48 -1.28 0.62 3.48 -0.6 -0.2" size="0.022" mass="4" material="truss" class="station_collision" />
+      <geom name="service_cap_pedestal" type="cylinder" pos="3.05 -1 0.7775" size="0.032 0.0375" mass="1.2" material="joint" contype="0" conaffinity="0" />
+      <geom name="service_cap_flange" type="cylinder" pos="3.05 -1 0.805" size="0.062 0.01" mass="0.8" material="joint" contype="0" conaffinity="0" />
+      <body name="service_cap" pos="3.05 -1 0.86">
+        <joint name="cap_hinge" type="hinge" axis="0 0 1" range="0 1.65" damping="0.2" frictionloss="0.08" armature="0.01" />
+        <geom name="service_cap_geom" type="cylinder" size="0.045 0.045" mass="0.28" material="cap" class="station_collision" />
+        <geom name="cap_rib_0" type="box" pos="0.049 0 0" size="0.01 0.018 0.04" mass="0.012" material="cap" class="station_collision" />
+        <geom name="cap_rib_1" type="box" pos="-0.049 0 0" size="0.01 0.018 0.04" mass="0.012" material="cap" class="station_collision" />
+        <geom name="cap_rib_2" type="box" pos="0 0.049 0" size="0.01 0.018 0.04" mass="0.012" material="cap" class="station_collision" />
+        <geom name="cap_rib_3" type="box" pos="0 -0.049 0" size="0.01 0.018 0.04" mass="0.012" material="cap" class="station_collision" />
+        <site name="cap_target" pos="0 0 0" size="0.01" rgba="1 0.2 0.1 0.6" />
+      </body>
+      <site name="rail_target_FL" pos="-2.25 0.6 0.58" size="0.01" rgba="0.1 0.8 1 0.45" />
+      <site name="rail_target_FR" pos="-2.25 -0.6 0.58" size="0.01" rgba="0.1 0.8 1 0.45" />
+      <site name="rail_target_RL" pos="-3.15 0.6 0.58" size="0.01" rgba="0.1 0.8 1 0.45" />
+      <site name="rail_target_RR" pos="-3.15 -0.6 0.58" size="0.01" rgba="0.1 0.8 1 0.45" />
+    </body>
+    <body name="robot" pos="-2.7 0 1.18">
+      <freejoint name="robot_free" />
+      <geom name="robot_torso" type="box" size="0.38 0.29 0.14" mass="42" material="station" class="robot_collision" />
+      <geom name="robot_top_shell" type="box" pos="0 0 0.16" size="0.22 0.18 0.055" mass="5.5" material="palm" class="robot_collision" />
+      <geom name="robot_sensor" type="cylinder" pos="0.12 0 0.235" size="0.065 0.025" mass="0.45" material="joint" class="robot_collision" />
+      <body name="FL_yaw_body" pos="0.36 0.28 0" euler="0 0 0">
+        <joint name="FL_yaw" type="hinge" axis="0 0 1" range="-2.45 2.45" damping="1.4" armature="0.025" />
+        <geom name="FL_shoulder_shell" type="cylinder" size="0.075 0.045" mass="0.55" material="joint" class="robot_collision" />
+        <body name="FL_pitch_body">
+          <joint name="FL_pitch" type="hinge" axis="0 1 0" range="-1.6 2.3" damping="1.8" armature="0.035" />
+          <geom name="FL_upper_geom" type="capsule" fromto="0 0 0 0.46 0 0" size="0.046" mass="1.35" material="limb" class="robot_collision" />
+          <body name="FL_elbow_body" pos="0.46 0 0">
+            <joint name="FL_elbow" type="hinge" axis="0 1 0" range="0.05 2.55" damping="1.6" armature="0.03" />
+            <geom name="FL_elbow_shell" type="sphere" size="0.055" mass="0.32" material="joint" class="robot_collision" />
+            <geom name="FL_forearm_geom" type="capsule" fromto="0 0 0 0.42 0 0" size="0.04" mass="1.05" material="limb" class="robot_collision" />
+            <body name="FL_wrist_yaw_body" pos="0.42 0 0">
+              <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+              <joint name="FL_wrist_yaw" type="hinge" axis="0 0 1" range="-3.14 3.14" damping="0.22" armature="0.003" />
+              <body name="FL_wrist_pitch_body">
+                <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+                <joint name="FL_wrist_pitch" type="hinge" axis="0 1 0" range="-3.14 3.14" damping="0.22" armature="0.003" />
+                <body name="FL_palm">
+                  <joint name="FL_wrist_roll" type="hinge" axis="1 0 0" range="-3.14 3.14" damping="0.25" armature="0.004" />
+                  <geom name="FL_palm_geom" type="box" size="0.082 0.078 0.025" mass="0.42" material="palm" class="robot_collision" />
+                  <site name="FL_grasp_site" pos="0 0 -0.09" size="0.012" rgba="0.1 1 0.35 0.45" />
+                  <body name="FL_finger1_prox_body" pos="0.045 0.075 -0.015">
+                    <joint name="FL_finger1_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FL_finger1_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FL_finger1_dist_body" pos="0 0 -0.07">
+                      <joint name="FL_finger1_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FL_finger1_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FL_finger1_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="FL_finger2_prox_body" pos="-0.045 0.075 -0.015">
+                    <joint name="FL_finger2_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FL_finger2_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FL_finger2_dist_body" pos="0 0 -0.07">
+                      <joint name="FL_finger2_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FL_finger2_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FL_finger2_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="FL_finger3_prox_body" pos="0.045 -0.075 -0.015">
+                    <joint name="FL_finger3_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FL_finger3_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FL_finger3_dist_body" pos="0 0 -0.07">
+                      <joint name="FL_finger3_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FL_finger3_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FL_finger3_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="FL_finger4_prox_body" pos="-0.045 -0.075 -0.015">
+                    <joint name="FL_finger4_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FL_finger4_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FL_finger4_dist_body" pos="0 0 -0.07">
+                      <joint name="FL_finger4_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FL_finger4_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FL_finger4_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="FR_yaw_body" pos="0.36 -0.28 0" euler="0 0 0">
+        <joint name="FR_yaw" type="hinge" axis="0 0 1" range="-2.45 2.45" damping="1.4" armature="0.025" />
+        <geom name="FR_shoulder_shell" type="cylinder" size="0.075 0.045" mass="0.55" material="joint" class="robot_collision" />
+        <body name="FR_pitch_body">
+          <joint name="FR_pitch" type="hinge" axis="0 1 0" range="-1.6 2.3" damping="1.8" armature="0.035" />
+          <geom name="FR_upper_geom" type="capsule" fromto="0 0 0 0.46 0 0" size="0.046" mass="1.35" material="limb" class="robot_collision" />
+          <body name="FR_elbow_body" pos="0.46 0 0">
+            <joint name="FR_elbow" type="hinge" axis="0 1 0" range="0.05 2.55" damping="1.6" armature="0.03" />
+            <geom name="FR_elbow_shell" type="sphere" size="0.055" mass="0.32" material="joint" class="robot_collision" />
+            <geom name="FR_forearm_geom" type="capsule" fromto="0 0 0 0.42 0 0" size="0.04" mass="1.05" material="limb" class="robot_collision" />
+            <body name="FR_wrist_yaw_body" pos="0.42 0 0">
+              <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+              <joint name="FR_wrist_yaw" type="hinge" axis="0 0 1" range="-3.14 3.14" damping="0.22" armature="0.003" />
+              <body name="FR_wrist_pitch_body">
+                <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+                <joint name="FR_wrist_pitch" type="hinge" axis="0 1 0" range="-3.14 3.14" damping="0.22" armature="0.003" />
+                <body name="FR_palm">
+                  <joint name="FR_wrist_roll" type="hinge" axis="1 0 0" range="-3.14 3.14" damping="0.25" armature="0.004" />
+                  <geom name="FR_palm_geom" type="box" size="0.082 0.078 0.025" mass="0.42" material="palm" class="robot_collision" />
+                  <site name="FR_grasp_site" pos="0 0 -0.09" size="0.012" rgba="0.1 1 0.35 0.45" />
+                  <body name="FR_finger1_prox_body" pos="0.045 0.075 -0.015">
+                    <joint name="FR_finger1_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FR_finger1_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FR_finger1_dist_body" pos="0 0 -0.07">
+                      <joint name="FR_finger1_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FR_finger1_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FR_finger1_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="FR_finger2_prox_body" pos="-0.045 0.075 -0.015">
+                    <joint name="FR_finger2_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FR_finger2_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FR_finger2_dist_body" pos="0 0 -0.07">
+                      <joint name="FR_finger2_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FR_finger2_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FR_finger2_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="FR_finger3_prox_body" pos="0.045 -0.075 -0.015">
+                    <joint name="FR_finger3_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FR_finger3_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FR_finger3_dist_body" pos="0 0 -0.07">
+                      <joint name="FR_finger3_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FR_finger3_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FR_finger3_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="FR_finger4_prox_body" pos="-0.045 -0.075 -0.015">
+                    <joint name="FR_finger4_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="FR_finger4_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="FR_finger4_dist_body" pos="0 0 -0.07">
+                      <joint name="FR_finger4_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="FR_finger4_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="FR_finger4_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="RL_yaw_body" pos="-0.36 0.28 0" euler="0 0 3.14159265">
+        <joint name="RL_yaw" type="hinge" axis="0 0 1" range="-2.45 2.45" damping="1.4" armature="0.025" />
+        <geom name="RL_shoulder_shell" type="cylinder" size="0.075 0.045" mass="0.55" material="joint" class="robot_collision" />
+        <body name="RL_pitch_body">
+          <joint name="RL_pitch" type="hinge" axis="0 1 0" range="-1.6 2.3" damping="1.8" armature="0.035" />
+          <geom name="RL_upper_geom" type="capsule" fromto="0 0 0 0.46 0 0" size="0.046" mass="1.35" material="limb" class="robot_collision" />
+          <body name="RL_elbow_body" pos="0.46 0 0">
+            <joint name="RL_elbow" type="hinge" axis="0 1 0" range="0.05 2.55" damping="1.6" armature="0.03" />
+            <geom name="RL_elbow_shell" type="sphere" size="0.055" mass="0.32" material="joint" class="robot_collision" />
+            <geom name="RL_forearm_geom" type="capsule" fromto="0 0 0 0.42 0 0" size="0.04" mass="1.05" material="limb" class="robot_collision" />
+            <body name="RL_wrist_yaw_body" pos="0.42 0 0">
+              <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+              <joint name="RL_wrist_yaw" type="hinge" axis="0 0 1" range="-3.14 3.14" damping="0.22" armature="0.003" />
+              <body name="RL_wrist_pitch_body">
+                <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+                <joint name="RL_wrist_pitch" type="hinge" axis="0 1 0" range="-3.14 3.14" damping="0.22" armature="0.003" />
+                <body name="RL_palm">
+                  <joint name="RL_wrist_roll" type="hinge" axis="1 0 0" range="-3.14 3.14" damping="0.25" armature="0.004" />
+                  <geom name="RL_palm_geom" type="box" size="0.082 0.078 0.025" mass="0.42" material="palm" class="robot_collision" />
+                  <site name="RL_grasp_site" pos="0 0 -0.09" size="0.012" rgba="0.1 1 0.35 0.45" />
+                  <body name="RL_finger1_prox_body" pos="0.045 0.075 -0.015">
+                    <joint name="RL_finger1_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RL_finger1_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RL_finger1_dist_body" pos="0 0 -0.07">
+                      <joint name="RL_finger1_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RL_finger1_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RL_finger1_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="RL_finger2_prox_body" pos="-0.045 0.075 -0.015">
+                    <joint name="RL_finger2_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RL_finger2_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RL_finger2_dist_body" pos="0 0 -0.07">
+                      <joint name="RL_finger2_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RL_finger2_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RL_finger2_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="RL_finger3_prox_body" pos="0.045 -0.075 -0.015">
+                    <joint name="RL_finger3_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RL_finger3_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RL_finger3_dist_body" pos="0 0 -0.07">
+                      <joint name="RL_finger3_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RL_finger3_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RL_finger3_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="RL_finger4_prox_body" pos="-0.045 -0.075 -0.015">
+                    <joint name="RL_finger4_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RL_finger4_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RL_finger4_dist_body" pos="0 0 -0.07">
+                      <joint name="RL_finger4_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RL_finger4_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RL_finger4_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="RR_yaw_body" pos="-0.36 -0.28 0" euler="0 0 3.14159265">
+        <joint name="RR_yaw" type="hinge" axis="0 0 1" range="-2.45 2.45" damping="1.4" armature="0.025" />
+        <geom name="RR_shoulder_shell" type="cylinder" size="0.075 0.045" mass="0.55" material="joint" class="robot_collision" />
+        <body name="RR_pitch_body">
+          <joint name="RR_pitch" type="hinge" axis="0 1 0" range="-1.6 2.3" damping="1.8" armature="0.035" />
+          <geom name="RR_upper_geom" type="capsule" fromto="0 0 0 0.46 0 0" size="0.046" mass="1.35" material="limb" class="robot_collision" />
+          <body name="RR_elbow_body" pos="0.46 0 0">
+            <joint name="RR_elbow" type="hinge" axis="0 1 0" range="0.05 2.55" damping="1.6" armature="0.03" />
+            <geom name="RR_elbow_shell" type="sphere" size="0.055" mass="0.32" material="joint" class="robot_collision" />
+            <geom name="RR_forearm_geom" type="capsule" fromto="0 0 0 0.42 0 0" size="0.04" mass="1.05" material="limb" class="robot_collision" />
+            <body name="RR_wrist_yaw_body" pos="0.42 0 0">
+              <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+              <joint name="RR_wrist_yaw" type="hinge" axis="0 0 1" range="-3.14 3.14" damping="0.22" armature="0.003" />
+              <body name="RR_wrist_pitch_body">
+                <inertial pos="0 0 0" mass="0.035" diaginertia="8e-05 8e-05 8e-05" />
+                <joint name="RR_wrist_pitch" type="hinge" axis="0 1 0" range="-3.14 3.14" damping="0.22" armature="0.003" />
+                <body name="RR_palm">
+                  <joint name="RR_wrist_roll" type="hinge" axis="1 0 0" range="-3.14 3.14" damping="0.25" armature="0.004" />
+                  <geom name="RR_palm_geom" type="box" size="0.082 0.078 0.025" mass="0.42" material="palm" class="robot_collision" />
+                  <site name="RR_grasp_site" pos="0 0 -0.09" size="0.012" rgba="0.1 1 0.35 0.45" />
+                  <body name="RR_finger1_prox_body" pos="0.045 0.075 -0.015">
+                    <joint name="RR_finger1_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RR_finger1_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RR_finger1_dist_body" pos="0 0 -0.07">
+                      <joint name="RR_finger1_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RR_finger1_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RR_finger1_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="RR_finger2_prox_body" pos="-0.045 0.075 -0.015">
+                    <joint name="RR_finger2_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RR_finger2_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RR_finger2_dist_body" pos="0 0 -0.07">
+                      <joint name="RR_finger2_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RR_finger2_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RR_finger2_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="RR_finger3_prox_body" pos="0.045 -0.075 -0.015">
+                    <joint name="RR_finger3_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RR_finger3_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RR_finger3_dist_body" pos="0 0 -0.07">
+                      <joint name="RR_finger3_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RR_finger3_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RR_finger3_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                  <body name="RR_finger4_prox_body" pos="-0.045 -0.075 -0.015">
+                    <joint name="RR_finger4_prox" type="hinge" axis="1 0 0" range="-1.65 1.05" damping="0.025" armature="0.0004" />
+                    <geom name="RR_finger4_prox_geom" type="capsule" fromto="0 0 0 0 0 -0.07" size="0.012" mass="0.028" class="finger_collision" />
+                    <body name="RR_finger4_dist_body" pos="0 0 -0.07">
+                      <joint name="RR_finger4_dist" type="hinge" axis="1 0 0" range="-1.65 1.2" damping="0.018" armature="0.0003" />
+                      <geom name="RR_finger4_dist_geom" type="capsule" fromto="0 0 0 0 0 -0.06" size="0.01" mass="0.02" class="finger_collision" />
+                      <site name="RR_finger4_tip" pos="0 0 -0.06" size="0.008" rgba="0.95 0.65 0.15 0.8" />
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <connect name="rail_latch_FL" site1="FL_grasp_site" site2="rail_target_FL" active="false" solref="0.008 1" solimp="0.94 0.995 0.001" />
+    <connect name="rail_latch_FR" site1="FR_grasp_site" site2="rail_target_FR" active="false" solref="0.008 1" solimp="0.94 0.995 0.001" />
+    <connect name="rail_latch_RL" site1="RL_grasp_site" site2="rail_target_RL" active="false" solref="0.008 1" solimp="0.94 0.995 0.001" />
+    <connect name="rail_latch_RR" site1="RR_grasp_site" site2="rail_target_RR" active="false" solref="0.008 1" solimp="0.94 0.995 0.001" />
+    <connect name="cap_latch_FR" site1="FR_grasp_site" site2="cap_target" active="false" solref="0.015 1" solimp="0.9 0.99 0.002" />
+  </equality>
+  <actuator>
+    <position name="act_FL_finger1_prox" joint="FL_finger1_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FL_finger1_dist" joint="FL_finger1_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FL_finger2_prox" joint="FL_finger2_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FL_finger2_dist" joint="FL_finger2_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FL_finger3_prox" joint="FL_finger3_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FL_finger3_dist" joint="FL_finger3_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FL_finger4_prox" joint="FL_finger4_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FL_finger4_dist" joint="FL_finger4_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FL_yaw" joint="FL_yaw" kp="80" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-35 35" />
+    <position name="act_FL_pitch" joint="FL_pitch" kp="120" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-55 55" />
+    <position name="act_FL_elbow" joint="FL_elbow" kp="100" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-45 45" />
+    <position name="act_FL_wrist_yaw" joint="FL_wrist_yaw" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_FL_wrist_pitch" joint="FL_wrist_pitch" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_FL_wrist_roll" joint="FL_wrist_roll" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-6 6" />
+    <position name="act_FR_finger1_prox" joint="FR_finger1_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FR_finger1_dist" joint="FR_finger1_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FR_finger2_prox" joint="FR_finger2_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FR_finger2_dist" joint="FR_finger2_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FR_finger3_prox" joint="FR_finger3_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FR_finger3_dist" joint="FR_finger3_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FR_finger4_prox" joint="FR_finger4_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_FR_finger4_dist" joint="FR_finger4_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_FR_yaw" joint="FR_yaw" kp="80" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-35 35" />
+    <position name="act_FR_pitch" joint="FR_pitch" kp="120" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-55 55" />
+    <position name="act_FR_elbow" joint="FR_elbow" kp="100" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-45 45" />
+    <position name="act_FR_wrist_yaw" joint="FR_wrist_yaw" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_FR_wrist_pitch" joint="FR_wrist_pitch" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_FR_wrist_roll" joint="FR_wrist_roll" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-6 6" />
+    <position name="act_RL_finger1_prox" joint="RL_finger1_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RL_finger1_dist" joint="RL_finger1_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RL_finger2_prox" joint="RL_finger2_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RL_finger2_dist" joint="RL_finger2_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RL_finger3_prox" joint="RL_finger3_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RL_finger3_dist" joint="RL_finger3_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RL_finger4_prox" joint="RL_finger4_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RL_finger4_dist" joint="RL_finger4_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RL_yaw" joint="RL_yaw" kp="80" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-35 35" />
+    <position name="act_RL_pitch" joint="RL_pitch" kp="120" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-55 55" />
+    <position name="act_RL_elbow" joint="RL_elbow" kp="100" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-45 45" />
+    <position name="act_RL_wrist_yaw" joint="RL_wrist_yaw" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_RL_wrist_pitch" joint="RL_wrist_pitch" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_RL_wrist_roll" joint="RL_wrist_roll" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-6 6" />
+    <position name="act_RR_finger1_prox" joint="RR_finger1_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RR_finger1_dist" joint="RR_finger1_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RR_finger2_prox" joint="RR_finger2_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RR_finger2_dist" joint="RR_finger2_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RR_finger3_prox" joint="RR_finger3_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RR_finger3_dist" joint="RR_finger3_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RR_finger4_prox" joint="RR_finger4_prox" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-4 4" />
+    <position name="act_RR_finger4_dist" joint="RR_finger4_dist" kp="18" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-3.5 3.5" />
+    <position name="act_RR_yaw" joint="RR_yaw" kp="80" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-35 35" />
+    <position name="act_RR_pitch" joint="RR_pitch" kp="120" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-55 55" />
+    <position name="act_RR_elbow" joint="RR_elbow" kp="100" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-45 45" />
+    <position name="act_RR_wrist_yaw" joint="RR_wrist_yaw" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_RR_wrist_pitch" joint="RR_wrist_pitch" kp="30" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-10 10" />
+    <position name="act_RR_wrist_roll" joint="RR_wrist_roll" kp="20" ctrllimited="true" ctrlrange="-3.2 3.2" forcelimited="true" forcerange="-6 6" />
+  </actuator>
+  <sensor>
+    <jointpos name="cap_angle" joint="cap_hinge" />
+    <jointvel name="cap_rate" joint="cap_hinge" />
+    <framepos name="robot_position" objtype="body" objname="robot" />
+    <framepos name="station_position" objtype="body" objname="station" />
+  </sensor>
+</mujoco>
