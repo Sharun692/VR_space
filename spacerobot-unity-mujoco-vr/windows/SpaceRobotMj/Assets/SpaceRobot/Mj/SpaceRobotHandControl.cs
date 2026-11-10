@@ -61,6 +61,12 @@ public class SpaceRobotHandControl : MonoBehaviour {
       _engaged = true;
     }
 
+    // The mission would also command the limb, so it is switched off.
+    if (_mission.AutonomousMission) {
+      _mission.AutonomousMission = false;
+      Debug.Log("SpaceRobotHandControl: Autonomous Mission switched off while a limb is driven.");
+    }
+
     // Unity is Y up and MuJoCo is Z up, and limb targets are given in the
     // station's frame because the station itself moves.
     Vector3 p = Hand.position;

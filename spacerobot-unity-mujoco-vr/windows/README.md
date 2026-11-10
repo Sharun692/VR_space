@@ -1,37 +1,27 @@
-# Space service robot in Unity with MuJoCo: Windows
+# Space Service Robot: MuJoCo Physics in Unity (Windows)
 
-The robot walks along the truss rail of a space station and services a cap. The physics is computed by MuJoCo 3.11 running inside Unity, at a 1 ms time step. Unity's own physics engine is not used, and every contact force comes from MuJoCo.
+This package contains a simulation of a four-limbed service robot moving along the truss rail of a space station and servicing a cap. The physics is computed by MuJoCo 3.11 running inside Unity. Unity's own physics engine is not used: every contact force comes from MuJoCo, at a 1 ms time step.
 
 MuJoCo is included in the package. Nothing needs to be installed apart from Unity.
 
-The package was tested on Windows 11 with no MuJoCo or Python installed. The 150 s mission completes without errors both in the program and in Unity's Play mode, the built-in checks give the results listed in section 4, and the program builds from the editor.
+## Contents
 
-## 1. Requirements
-
-- Windows 10 or 11, 64-bit
-- Unity **6000.6.6f1** with Windows Build Support (Mono) (`unityhub://6000.6.6f1/d20c9ac777da`)
-
-## 2. Download
-
-The Windows folder alone is downloaded with:
-
-```powershell
-git clone --filter=blob:none --sparse https://github.com/Sharun692/VR_space.git
-cd VR_space
-git sparse-checkout set spacerobot-unity-mujoco-vr/windows
-cd spacerobot-unity-mujoco-vr\windows
-```
-
-The folder holds two folders.
-
-| Folder | Contents |
+| Folder | Description |
 | --- | --- |
 | `SpaceRobot_Player` | Ready-to-run Windows program |
 | `SpaceRobotMj` | Unity project |
 
-## 3. Running the program
+## Requirements
 
-`SpaceRobot_Player\SpaceRobot_Service.exe` runs the mission. The robot walks along the rail and then services the cap. The first launch takes a few minutes while Unity prepares its shaders.
+- Windows 10 or 11, 64-bit
+- Unity Hub, signed in with a Unity account and a Personal licence
+- Unity Editor **6000.6.6f1**, with **Windows Build Support (Mono)**. To install this exact version, open the following link after installing Unity Hub: `unityhub://6000.6.6f1/d20c9ac777da`
+
+## 1. Running the program
+
+Run `SpaceRobot_Player\SpaceRobot_Service.exe`.
+
+The first launch takes a few minutes while Unity prepares its shaders. Later launches start within seconds. The robot walks along the rail, then services the cap.
 
 | Control | Action |
 | --- | --- |
@@ -40,42 +30,18 @@ The folder holds two folders.
 | Mouse wheel | Zoom |
 | F | Recentre on the robot |
 
-## 4. The project
+## 2. Opening the project
 
-The Unity project is `SpaceRobotMj`. The service scene `Assets/SpaceRobot/Scenes/SpaceRobot_Service_Mj.unity` opens automatically. In Play mode the robot walks along the rail, with no errors in the Console.
+1. In Unity Hub, select **Add → Add project from disk** and choose the `SpaceRobotMj` folder.
+2. Open the project with version 6000.6.6f1. The first opening takes several minutes.
+3. The scene `Assets/SpaceRobot/Scenes/SpaceRobot_Service_Mj.unity` opens automatically. If it does not, open it from the Project window.
+4. Press **Play**. The robot walks along the rail.
 
-### The scene
+The Console (**Window → General → Console**) should contain no errors.
 
-| Object | Contents |
-| --- | --- |
-| `SpaceRobot` | The robot and the station. Each body, joint, geometry and actuator of the MuJoCo model is a Unity object, with its MuJoCo settings in the Inspector. |
-| `Mission` | The scripts that run the simulation, listed below |
-| `Observer camera` | Desktop camera with the mouse controls of section 3 |
-| `Sun light` | Scene lighting |
-| `Global Settings` | `MjGlobalSettings`, with `UseRawGameObjectNames` ticked |
+## 3. Verifying the simulation
 
-`MjScene`, which holds the compiled MuJoCo model, is created on entering Play mode and is not saved with the scene. The scene contains no rigidbodies and no colliders.
-
-| Script on `Mission` | Role |
-| --- | --- |
-| `SpaceRobotMission` | Steps the physics and publishes force readings |
-| `SpaceRobotHandControl` | Drives a limb from a tracked hand |
-| `SpaceRobotHaptics` | Controller vibration from a measured force |
-| `SpaceRobotCapture` | Writes a screenshot at a given simulated time |
-
-The supporting code is in `Assets/SpaceRobot/Mj`. `MissionController` holds the gait, the cap sequence and the rail latches. `Stabilization` covers station keeping, attitude hold and limb Cartesian control. `ContactMeasurements` measures contacts each step, and `MjModelAccess` gives named access to the MuJoCo model and data.
-
-Unticking **Autonomous Mission** on `SpaceRobotMission` keeps the robot holding the rail and skips the cap sequence, while station keeping, contact measurement and hand control continue. This is the mode for hand control.
-
-`UseRawGameObjectNames` has to stay ticked. Without it every MuJoCo element is renamed, `robot` becomes `robot_0`, and lookups by name fail.
-
-### Rebuilding the scene
-
-The scene is generated from the model file `tools/spacerobot_high_fidelity.xml`. After the model is edited, **SpaceRobot → Build in-Unity MuJoCo scene** reimports it, applies the settings above, attaches the mission components and saves the scene. Changes made by hand to the scene are lost when it is rebuilt.
-
-### Verifying the simulation
-
-Two checks are available from the **SpaceRobot** menu. Each runs outside Play mode and writes its results to the Console. The mission check takes about 40 s and the limb test about 10 s.
+Four checks are available from the **SpaceRobot** menu, each writing its results to the Console. The first three run without Play mode; the editor does not respond while they run, about 40 s for the mission and 10–30 s for the others, and then returns to the service scene.
 
 **SpaceRobot → Run in-Unity mission validation** runs the full 150 s mission. Expected lines:
 
@@ -93,19 +59,39 @@ HAND limb=FL distance_before=0.2500 m  distance_after=0.0016 m
 HAND verdict=ALL FOLLOW TARGET
 ```
 
-## 5. Building the program
+**SpaceRobot → Test body control** moves the body beyond the legs' reach and back, then moves and turns it while the two front limbs are driven and the rear limbs hold the rail, and finally pulls it out of reach and back with the hands held still. Expected last line:
 
-**SpaceRobot → Build in-Unity MuJoCo Windows player** builds the program in under a minute and replaces the contents of `SpaceRobot_Player`, whose folder then opens in Explorer.
+```
+BODY verdict=BODY FOLLOWS TARGET
+```
 
-## 6. VR interfaces
+**SpaceRobot → Test body and hands in Play mode** checks the components as an XR rig uses them. It starts Play mode, assigns stand-in objects as the headset and the two controllers, moves and turns the head, and stops Play mode after about 15 s. Use it to confirm the robot follows assigned transforms before connecting a headset. Expected last line:
 
-No XR packages or rig are included. The project provides limb control from a tracked hand and force feedback, both on the `Mission` object. `SpaceRobotHandControl` drives one limb from a transform, and a second component drives a second limb. `SpaceRobotHaptics` sends vibration to a controller. With **Autonomous Mission** ticked, the mission also commands the limbs.
+```
+PLAYTEST verdict=BODY AND HANDS FOLLOW
+```
 
-**Run In Background** is enabled in the player settings, so the program keeps running when its window loses focus.
+## 4. Building the program
+
+Select **SpaceRobot → Build in-Unity MuJoCo Windows player**. The build takes under a minute and replaces the program in `SpaceRobot_Player`, whose folder then opens in Explorer. Close the program first if it is running.
+
+## 5. Connecting a VR headset
+
+The project provides limb and body control from tracked transforms and force feedback, but no headset support is configured. To add it:
+
+1. In **Window → Package Manager**, install **XR Plugin Management** and **OpenXR**, and, if a ready-made rig is wanted, the **XR Interaction Toolkit**.
+2. In **Edit → Project Settings → XR Plug-in Management**, enable **OpenXR** and add the interaction profile of the headset in use.
+3. Add an XR Origin rig to the scene. The existing `Observer camera` can then be disabled.
+4. On the `Mission` object:
+   - In `SpaceRobotHandControl`, set **Hand** to a controller transform of the rig and **Limb** to the limb it should drive (0 FL, 1 FR, 2 RL, 3 RR). Add a second component for the other hand.
+   - In `SpaceRobotBodyControl`, set **Body** to the transform that should pose the robot's body, such as the headset.
+   - In `SpaceRobotHaptics`, set **Hand** to the same controller. Vibration then follows the contact force measured on that limb.
+
+   The autonomous mission switches itself off as soon as a Hand or Body transform is in use, so that it does not also command the limbs and body.
 
 ### Hand control
 
-A driven limb follows its target position. MuJoCo resolves any contact on the way, and no Unity colliders are involved.
+A driven limb follows its target position, with the hand held palm-down. MuJoCo resolves any contact on the way; no Unity colliders are involved.
 
 | Field | Meaning |
 | --- | --- |
@@ -117,42 +103,26 @@ A driven limb follows its target position. MuJoCo resolves any contact on the wa
 | `Damping` | Damping on that pull |
 | `ForceLimit` | Maximum force the limb applies, in newtons |
 
-At the default settings a limb 25 cm from its target reaches 1.6 mm from it within four seconds. A higher `Stiffness` tracks more closely, and `Damping` is raised with it to avoid overshoot.
+At the default settings a limb 25 cm from its target reaches 1.6 mm from it within four seconds. Higher `Stiffness` tracks more closely; `Damping` should be raised with it to avoid overshoot.
 
-### Driving a limb from a script
+### Body control
 
-Targets are given in the station's frame, since the station drifts in orbit. Unity is Y up and MuJoCo is Z up.
+The robot's body takes the world position and rotation of the **Body** transform: the body origin moves to the transform's position, and the body's axes align with the transform's axes. The limbs still on the rail bend to carry the body there, and MuJoCo resolves all contact. Body and hand control can be combined, for example the headset on the body and the two controllers on the front limbs, with the rear limbs holding the rail.
 
-```csharp
-var mission = FindAnyObjectByType<SpaceRobotMission>();
-var controller = mission.Controller;      // null until the first physics step
-int limb = Rig.FR;
+| Field | Meaning |
+| --- | --- |
+| `Body` | Transform the body follows, in position and rotation |
+| `OutOfReach` | True when the body has stopped short of the target because the legs on the rail cannot reach further (read only) |
+| `PositionError` | Distance from the body to the target, in metres (read only) |
+| `AngleError` | Angle between the body and the target, in degrees (read only) |
 
-Vector3 p = handTransform.position;
-V3 target = mission.Model.WorldToStationLocal(new V3(p.x, p.z, p.y));
+Moved 10 cm forward, 5 cm sideways and 8 cm up and turned 10°, the body settles within 6 mm and 0.3° of the target. A target beyond the legs' reach leaves the body at rest at the limit, with the rail grip held, and `OutOfReach` is set after about 1.5 s without progress. When the target comes back within reach, the body and any driven hands return to their targets.
 
-controller.SetRailLatch(limb, false);           // release the rail
-controller.SetExternalLimb(limb, target, grip); // grip 0 open to 1 closed
-
-controller.ClearExternalLimb(limb);             // return the limb to the mission
-controller.ClearAllExternalLimbs();
-```
-
-`SetExternalLimb` is called every frame for each driven limb, and `controller.IsExternal(limb)` reports whether a limb is driven. Limbs not driven keep their grip on the rail.
-
-### Grasping
-
-```csharp
-int fingersOnCap = mission.Contacts.CapFingerCount(Rig.FR);
-double capForce = mission.Contacts.CapContactForce;
-double gripForce = mission.Contacts.GripForces[Rig.FR];
-```
-
-The mission treats a grasp as secure once two or more fingers touch the cap and the hand is within 20 mm of it. `controller.SetCapLatch(true)` then attaches the cap to the hand.
+From a script, `mission.Controller.SetExternalBody(position, rotation)` sets the target relative to the station, `ClearExternalBody()` releases it, and `SpaceRobotBodyControl.ToStationFrame` converts a Unity transform into that form.
 
 ### Force feedback
 
-`SpaceRobotHaptics` converts a measured force into controller vibration. **From** selects the force. `LimbGrip` is everything the limb's fingers touch, including the rail, and `CapContact` is the cap alone. `FullScaleForce` is the force giving full amplitude and `Threshold` the force below which nothing is sent.
+`SpaceRobotHaptics` converts a measured force into controller vibration. **From** selects the force: `LimbGrip`, everything the limb's fingers touch, including the rail, or `CapContact`, the cap alone. `FullScaleForce` is the force giving full amplitude and `Threshold` the force below which nothing is sent.
 
 Other devices can read the forces directly. `SpaceRobotMission.ForceSampleAvailable` is raised after every 1 ms physics step:
 
@@ -169,19 +139,6 @@ mission.ForceSampleAvailable += s => {
 
 The handler runs on Unity's main thread, so slow work in it slows the simulation.
 
-## 7. Time stepping
+### Timing
 
-The MuJoCo plug-in compiles the model with Unity's `Time.fixedDeltaTime` as its time step, which is 20 ms by default. `SpaceRobotMission` sets 1 ms before the model is compiled and enforces it on the compiled model as well.
-
-The simulation advances once per rendered frame, by as many 1 ms steps as the frame lasted. At 90 Hz that is eleven steps, taking about 3 ms of the 11.1 ms frame on a current desktop processor. Each frame therefore shows the state at its own time.
-
-## 8. Changes to the MuJoCo plug-in
-
-The project includes a modified copy of `org.mujoco` 3.11.0 in `Packages/org.mujoco`. The model does not import or run correctly with the unmodified package, so the included copy is used rather than a separately installed one.
-
-1. Body rotations given as `euler`, `axisangle`, `xyaxes` or `zaxis` were ignored, so two limbs imported unrotated. All four forms are now read.
-2. Constraints using `site1` and `site2` were unsupported, and the import failed. The rail latches and the cap grasp use that form. It is now supported, and constraints can be engaged and released during simulation.
-3. A call to `Object.GetInstanceID()`, which Unity 6 rejects, was replaced.
-4. Scene objects were gathered in an undefined order, so results differed between runs. They are now sorted, and runs repeat exactly.
-5. On first opening, the plug-in copied MuJoCo from a system installation and failed where none was present. This step is removed, since the project carries its own copy in `Assets/Plugins/x86_64`.
-6. `MjScene.ManualStepping` lets a script step the physics once per rendered frame instead of from `FixedUpdate`.
+The simulation advances once per rendered frame, by as many 1 ms steps as the frame lasted: eleven steps at 90 Hz, taking about 3 ms of the 11.1 ms frame on a current desktop processor.

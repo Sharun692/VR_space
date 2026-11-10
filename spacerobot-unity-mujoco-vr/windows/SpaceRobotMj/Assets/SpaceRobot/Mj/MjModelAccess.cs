@@ -101,6 +101,14 @@ public unsafe class MjModelAccess {
     for (int j = 0; j < 6; j++) Data->ctrl[actuators[j]] = Data->qpos[qpos[j]];
   }
 
+  // Holds only the arm joints (yaw, pitch, elbow) at their measured angles and
+  // leaves the wrist actuators on their commanded angles.
+  public void HoldArm(int leg) {
+    var actuators = _limbActuator[leg];
+    var qpos = _limbQpos[leg];
+    for (int j = 0; j < 3; j++) Data->ctrl[actuators[j]] = Data->qpos[qpos[j]];
+  }
+
   public void SetLimbQpos(int leg, double[] values) {
     var qpos = _limbQpos[leg];
     for (int j = 0; j < 6; j++) Data->qpos[qpos[j]] = values[j];

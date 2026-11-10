@@ -71,6 +71,14 @@ public static class Kinematics {
     SolveLimbIk(leg, (graspTarget + Rig.PalmOffset) - basePosition, M3.RotZ(palmTwist), limb);
   }
 
+  // As above, for a body turned by baseRotation relative to the station.
+  public static void InverseKinematics(
+      int leg, V3 basePosition, M3 baseRotation, V3 graspTarget, double palmTwist, double[] limb) {
+    M3 toBody = baseRotation.T;
+    SolveLimbIk(leg, toBody * ((graspTarget + Rig.PalmOffset) - basePosition),
+                toBody * M3.RotZ(palmTwist), limb);
+  }
+
   public static void ActualPoseInverseKinematics(
       MjModelAccess m, int leg, V3 graspTarget, double palmTwist, double[] limb) {
     M3 sr = m.StationMat, rr = m.RobotMat;
@@ -91,10 +99,21 @@ public static class Kinematics {
   public static void ApplyTargets(
       MjModelAccess m, V3 basePosition, V3[] graspTargets,
       double[] closures, double[] twists, bool actualFrame,
+      double[] limbScratch, double[] fingerScratch) =>
+    ApplyTargets(m, basePosition, null, graspTargets, closures, twists, actualFrame,
+                 limbScratch, fingerScratch);
+
+  // baseRotation null keeps the body level with the station, the mission's
+  // own assumption, and runs exactly the original computation.
+  public static void ApplyTargets(
+      MjModelAccess m, V3 basePosition, M3? baseRotation, V3[] graspTargets,
+      double[] closures, double[] twists, bool actualFrame,
       double[] limbScratch, double[] fingerScratch) {
     for (int leg = 0; leg < Rig.LegCount; leg++) {
       if (actualFrame) {
         ActualPoseInverseKinematics(m, leg, graspTargets[leg], twists[leg], limbScratch);
+      } else if (baseRotation.HasValue) {
+        InverseKinematics(leg, basePosition, baseRotation.Value, graspTargets[leg], twists[leg], limbScratch);
       } else {
         InverseKinematics(leg, basePosition, graspTargets[leg], twists[leg], limbScratch);
       }

@@ -44,7 +44,11 @@ public unsafe class Stabilization {
     _m.AddXfrcTorque(_m.StationBody, torque);
   }
 
-  public void WholeBody(V3 targetStationLocal) {
+  public void WholeBody(V3 targetStationLocal) => WholeBody(targetStationLocal, M3.Identity);
+
+  // targetRotation is the body's orientation relative to the station. The
+  // identity holds the body level with the station, as the mission does.
+  public void WholeBody(V3 targetStationLocal, M3 targetRotation) {
     M3 sr = _m.StationMat, rr = _m.RobotMat;
     V3 targetWorld = _m.StationPos + sr * targetStationLocal;
 
@@ -53,7 +57,7 @@ public unsafe class Stabilization {
     double fn = force.Norm;
     if (fn > 65.0) force = force * (65.0 / fn);
 
-    M3 rel = sr.T * rr;
+    M3 rel = sr.T * rr * targetRotation.T;
     V3 attitudeErrorStation = 0.5 * new V3(rel.m21 - rel.m12, rel.m02 - rel.m20, rel.m10 - rel.m01);
     V3 attitudeErrorWorld = sr * attitudeErrorStation;
     V3 relativeAngular = _m.Qvel3(_m.RobotDof + 3) - _m.Qvel3(_m.StationDof + 3);

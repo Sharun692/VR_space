@@ -59,6 +59,75 @@ public unsafe class MissionController {
     for (int leg = 0; leg < Rig.LegCount; leg++) _externalActive[leg] = false;
   }
 
+  // The body can be taken over in the same way: it is pulled toward the
+  // supplied pose, and the legs still on the rail bend to carry it there. It
+  // stops wherever those legs run out of reach.
+  private bool _bodyActive;
+  private V3 _bodyTarget;
+  private M3 _bodyRotation = M3.Identity;
+
+  public bool IsBodyExternal => _bodyActive;
+
+  // Target position of the body origin and its orientation, both relative to
+  // the station.
+  public void SetExternalBody(V3 stationLocalTarget, M3 stationLocalRotation) {
+    _bodyActive = true;
+    _bodyTarget = stationLocalTarget;
+    _bodyRotation = stationLocalRotation;
+  }
+
+  public void ClearExternalBody() {
+    _bodyActive = false;
+    _windowStart = double.NegativeInfinity;
+  }
+
+  // Distance and angle between the body and its external target, updated each
+  // step while the body is under external control.
+  public double BodyPositionError { get; private set; }
+  public double BodyAngleError { get; private set; }
+
+  // True when the body is short of its target and has not come any closer for
+  // a while: the legs holding the rail cannot carry it further. A slow wobble
+  // at the limit does not count as coming closer.
+  public bool BodyOutOfReach { get; private set; }
+
+  private const double ReachPositionTolerance = 0.03;
+  private const double ReachAngleTolerance = 0.05;
+  private const double ProgressPosition = 0.005;
+  private const double ProgressAngle = 0.01;
+  private const double StallTime = 1.5;
+  // A target that jumps away restarts the measure, so a body still chasing a
+  // moving target is not reported as stuck.
+  private const double TargetJump = 0.05;
+
+  private double _windowStart = double.NegativeInfinity;
+  private double _windowPositionError, _windowAngleError;
+
+  private void MeasureBodyError(double now) {
+    M3 sr = _m.StationMat;
+    V3 position = _m.WorldToStationLocal(_m.RobotPos);
+    M3 error = sr.T * _m.RobotMat * _bodyRotation.T;
+    BodyPositionError = (_bodyTarget - position).Norm;
+    BodyAngleError = Math.Acos(MjMath.Clamp((error.Trace - 1.0) / 2.0, -1.0, 1.0));
+
+    bool shortOfTarget = BodyPositionError > ReachPositionTolerance
+                      || BodyAngleError > ReachAngleTolerance;
+    bool restart = !shortOfTarget
+                || double.IsNegativeInfinity(_windowStart)
+                || BodyPositionError > _windowPositionError + TargetJump;
+    bool closer = BodyPositionError < _windowPositionError - ProgressPosition
+               || BodyAngleError < _windowAngleError - ProgressAngle;
+    if (restart || closer) {
+      // _window* hold the closest approach so far and when it was made.
+      _windowStart = now;
+      _windowPositionError = Math.Min(BodyPositionError, restart ? double.MaxValue : _windowPositionError);
+      _windowAngleError = Math.Min(BodyAngleError, restart ? double.MaxValue : _windowAngleError);
+      BodyOutOfReach = false;
+    } else {
+      BodyOutOfReach = now - _windowStart >= StallTime;
+    }
+  }
+
   public string Stage { get; private set; } = "initial-grasp-settle";
   public int RegraspFailures { get; private set; }
   public bool CapGraspVerified { get; private set; }
@@ -252,18 +321,34 @@ public unsafe class MissionController {
       _twists[leg] = 0.0;
     }
 
-    bool actualFrame = Autonomous && _manipulating && now >= _manipulationStart;
-    Kinematics.ApplyTargets(_m, baseTarget, _targets, _closures, _twists, actualFrame, _limb, _fingers);
-
-    // A limb under external control is driven by the Cartesian term alone.
-    // Holding each joint actuator at its measured angle leaves it producing no
-    // force of its own, so the limb has a single control path rather than the
-    // inverse kinematics and the Cartesian term pulling against each other.
-    // The finger actuators are left as commanded, since they carry the grip.
-    for (int leg = 0; leg < Rig.LegCount; leg++) {
-      if (_externalActive[leg]) _m.HoldLimb(leg);
+    M3? baseRotation = null;
+    if (_bodyActive) {
+      baseTarget = _bodyTarget;
+      baseRotation = _bodyRotation;
     }
-    _stabilization.WholeBody(baseTarget);
+
+    bool actualFrame = Autonomous && _manipulating && now >= _manipulationStart;
+    Kinematics.ApplyTargets(_m, baseTarget, baseRotation, _targets, _closures, _twists,
+                            actualFrame, _limb, _fingers);
+
+    // A limb under external control is positioned by the Cartesian term alone.
+    // Holding the arm joint actuators at their measured angles leaves them
+    // producing no force of their own, so the hand's position has a single
+    // control path rather than the inverse kinematics and the Cartesian term
+    // pulling against each other. The wrist actuators keep the palm-down
+    // orientation from the inverse kinematics: left free, contact can roll the
+    // wrist until the open fingers point into the rail and hook it. The finger
+    // actuators are left as commanded, since they carry the grip.
+    for (int leg = 0; leg < Rig.LegCount; leg++) {
+      if (_externalActive[leg]) _m.HoldArm(leg);
+    }
+    if (_bodyActive) {
+      _stabilization.WholeBody(baseTarget, _bodyRotation);
+      MeasureBodyError(now);
+    } else {
+      _stabilization.WholeBody(baseTarget);
+      BodyOutOfReach = false;
+    }
     _stabilization.EarthCentredDisplayOrbit();
     _stabilization.StationAttitudeHold();
 

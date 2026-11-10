@@ -48,8 +48,9 @@ public static class BuildSpaceRobotMjScene {
     sceneObject.AddComponent<SpaceRobotMission>();
     sceneObject.AddComponent<SpaceRobotHaptics>();
     sceneObject.AddComponent<SpaceRobotCapture>();
-    // Inert until a Hand transform is assigned.
+    // Inert until a Hand or Body transform is assigned.
     sceneObject.AddComponent<SpaceRobotHandControl>();
+    sceneObject.AddComponent<SpaceRobotBodyControl>();
 
     ApplyMujocoColours();
 

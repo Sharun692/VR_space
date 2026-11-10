@@ -6,7 +6,7 @@ The work is packaged separately for each operating system.
 
 | Folder | Contents |
 | --- | --- |
-| [`spacerobot-unity-mujoco-vr/windows`](spacerobot-unity-mujoco-vr/windows) | Windows program, Unity project, hand control and force feedback. Tested on Windows 11 without MuJoCo or Python installed. |
+| [`spacerobot-unity-mujoco-vr/windows`](spacerobot-unity-mujoco-vr/windows) | Windows program, Unity project, hand and body control from tracked transforms, and force feedback. Tested on Windows 11 without MuJoCo or Python installed. |
 | [`spacerobot-unity-mujoco-vr/linux`](spacerobot-unity-mujoco-vr/linux) | Linux program, Unity project, documentation of the scene and controls, and validation against the Python reference. |
 
 Each folder has its own README with the steps to run the program, open the project and check the results.
